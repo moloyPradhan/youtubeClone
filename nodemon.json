@@ -1,0 +1,11 @@
+{
+    "watch": [
+        "src"
+    ],
+    "ext": "js,json",
+    "ignore": [
+        "node_modules"
+    ],
+    "exec": "node -r dotenv/config --experimental-json-modules src/index.js",
+    "legacyWatch": true
+}

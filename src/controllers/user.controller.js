@@ -54,16 +54,17 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Avatar file is required")
     }
 
-    const avatar = await uploadOnCloudinary(avatarLocalPath)
+    let avatar = await uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
-    if (!avatar) {
-        throw new ApiError(400, "Avatar file is required")
-    }
+    // if (!avatar) {
+    //     throw new ApiError(400, "Avatar path is required")
+    // }
 
     const user = await User.create({
         fullName,
-        avatar: avatar.url,
+        // avatar: avatar.url || "testAvatar",
+        avatar: "testAvatar",
         coverImage: coverImage?.url || "",
         username: username.toLowerCase(),
         email,
@@ -85,7 +86,6 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const loginUser = asyncHandler(async (req, res) => {
-
     const { identifier, password } = req.body
 
     if (!identifier) {
@@ -218,7 +218,7 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
 
     if (!isPasswordCorrect) {
-        throw new ApiError(400, "Invalid own password")
+        throw new ApiError(400, "Invalid old password")
     }
 
     user.password = newPassword

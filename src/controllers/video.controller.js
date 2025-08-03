@@ -8,8 +8,9 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 
 
 const publishAVideo = asyncHandler(async (req, res) => {
-    const { title, description } = req.body
     // TODO: get video, upload to cloudinary, create video
+
+    const { title, description } = req.body
 
     const owner = req.user?._id;
 
@@ -34,6 +35,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
     if (!thumbnail) {
         throw new ApiError(400, "Thumbnail path is required")
     }
+
+    const duration = videoFile?.duration || 60;
 
     const data = await Video.create({
         videoFile: videoFile?.url,

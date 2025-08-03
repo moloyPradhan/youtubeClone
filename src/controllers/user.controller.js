@@ -26,14 +26,6 @@ const generateAccessAndRefreshTokens = async (userId) => {
 const registerUser = asyncHandler(async (req, res) => {
     const { username, email, fullName, password } = req.body
 
-    if (
-        [username, email, fullName, password].some((field) =>
-            field?.trim() === ""
-        )
-    ) {
-        throw new ApiError(400, "All fileds are required")
-    }
-
     const existedUser = await User.findOne({
         $or: [{ username }, { email }]
     })

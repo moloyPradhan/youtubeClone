@@ -13,6 +13,7 @@ const validate = (schema) => (req, res, next) => {
 
             return res.status(400).json({
                 success: false,
+                statusCode: 400,
                 message: 'Validation failed',
                 errors,
                 data: null,
@@ -21,6 +22,7 @@ const validate = (schema) => (req, res, next) => {
 
         return res.status(500).json({
             success: false,
+            statusCode: 500,
             message: err.message || 'Internal server error',
             errors: [],
             data: null,

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const registerSchema = z.object({
     username: z.string().min(3, 'Username is required minimum 3 characters'),
-    email: z.string().z.email("Must be a valid email"),
+    email: z.string().email("Must be a valid email"),
     fullName: z.string().min(3, 'Full name is required minimum 3 characters'),
     password: z.string().min(8, 'Password must contain 8 characters'),
 });
@@ -14,7 +14,7 @@ const loginSchema = z.object({
 
 const updateAccountDetailsSchema = z.object({
     fullName: z.string().min(3, 'Full name is required minimum 3 characters'),
-    email: z.string().z.email("Must be a valid email"),
+    email: z.string().email("Must be a valid email"),
 });
 
 

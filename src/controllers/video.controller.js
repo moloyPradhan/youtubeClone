@@ -55,14 +55,106 @@ const publishAVideo = asyncHandler(async (req, res) => {
 })
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    //TODO: get all videos based on query, sort, pagination
-})
+    const {
+        page = 1,
+        limit = 10,
+        query = '',
+        sortBy = 'createdAt',
+        sortType = 'desc',
+        userId
+    } = req.query;
 
+    // Build match stage
+    const matchStage = {};
+
+    if (query) {
+        matchStage.$or = [
+            { title: { $regex: query, $options: 'i' } },
+            { description: { $regex: query, $options: 'i' } }
+        ];
+    }
+
+    if (userId) {
+        matchStage.owner = new mongoose.Types.ObjectId(userId);
+    }
+
+    matchStage.isPublished = true
+
+    // Build aggregation pipeline
+    const aggregateQuery = Video.aggregate([
+        { $match: matchStage },
+
+        // Lookup user
+        {
+            $lookup: {
+                from: 'users', // collection name in lowercase
+                localField: 'owner',
+                foreignField: '_id',
+                as: 'owner'
+            }
+        },
+        { $unwind: '$owner' },
+
+        {
+            $addFields: {
+                durationInSecond: "$duration", // rename key
+            }
+        },
+
+        // Optional: project only selected user fields
+        {
+            $project: {
+                videoFile: 1,
+                thumbnail: 1,
+                title: 1,
+                description: 1,
+                durationInSecond: 1,
+                views: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                owner: {
+                    _id: 1,
+                    fullName: 1,
+                    avatar: 1
+                }
+            }
+        }
+    ]);
+
+    // Sort stage
+    const options = {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        sort: { [sortBy]: sortType === 'asc' ? 1 : -1 },
+        customLabels: {
+            totalDocs: "totalItems",
+            docs: "videos",
+            limit: "pageSize",
+            page: "currentPage",
+            totalPages: "pageCount",
+            nextPage: "next",
+            prevPage: "prev",
+            pagingCounter: "pageNumber",
+            hasPrevPage: "hasPrevious",
+            hasNextPage: "hasNext"
+        }
+    };
+
+    const result = await Video.aggregatePaginate(aggregateQuery, options);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "Videos fetched successfully", result));
+});
 
 const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params
-    //TODO: get video by id
+    const data = await Video.findById(videoId).populate('owner', '-password -refreshToken -email -watchHistory');
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "Video file get successfully", data))
+
 })
 
 const updateVideo = asyncHandler(async (req, res) => {

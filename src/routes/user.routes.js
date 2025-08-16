@@ -27,7 +27,7 @@ const router = Router()
 
 router.route("/register")
     .post(
-        validate(registerSchema),
+        // validate(registerSchema),
         upload.fields([
             {
                 name: "avatar",
